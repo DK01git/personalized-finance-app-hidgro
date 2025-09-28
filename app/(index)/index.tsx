@@ -1,87 +1,33 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Stack, router } from "expo-router";
-import { FlatList, Pressable, StyleSheet, View, Text } from "react-native";
-// Components
-import { IconCircle } from "@/components/IconCircle";
+import { ScrollView, Pressable, StyleSheet, View, Text } from "react-native";
 import { IconSymbol } from "@/components/IconSymbol";
-import { BodyScrollView } from "@/components/BodyScrollView";
-import { Button } from "@/components/button";
-// Constants & Hooks
-import { backgroundColors } from "@/constants/Colors";
-
-const ICON_COLOR = "#007AFF";
+import { colors, commonStyles } from "@/styles/commonStyles";
+import { DashboardCard } from "@/components/DashboardCard";
+import { QuickActions } from "@/components/QuickActions";
+import { RecentTransactions } from "@/components/RecentTransactions";
+import { FinancialGoals } from "@/components/FinancialGoals";
 
 export default function HomeScreen() {
-
-  const modalDemos = [
-    {
-      title: "Standard Modal",
-      description: "Full screen modal presentation",
-      route: "/modal",
-      color: "#007AFF",
-    },
-    {
-      title: "Form Sheet",
-      description: "Bottom sheet with detents and grabber",
-      route: "/formsheet",
-      color: "#34C759",
-    },
-    {
-      title: "Transparent Modal",
-      description: "Overlay without obscuring background",
-      route: "/transparent-modal",
-      color: "#FF9500",
-    }
-  ];
-
-  const renderModalDemo = ({ item }: { item: typeof modalDemos[0] }) => (
-    <View style={styles.demoCard}>
-      <View style={[styles.demoIcon, { backgroundColor: item.color }]}>
-        <IconSymbol name="square.grid.3x3" color="white" size={24} />
-      </View>
-      <View style={styles.demoContent}>
-        <Text style={styles.demoTitle}>{item.title}</Text>
-        <Text style={styles.demoDescription}>{item.description}</Text>
-      </View>
-      <Button
-        variant="outline"
-        size="sm"
-        onPress={() => router.push(item.route as any)}
-      >
-        Try It
-      </Button>
-    </View>
-  );
-
-  const renderEmptyList = () => (
-    <BodyScrollView contentContainerStyle={styles.emptyStateContainer}>
-      <IconCircle
-        emoji=""
-        backgroundColor={
-          backgroundColors[Math.floor(Math.random() * backgroundColors.length)]
-        }
-      />
-    </BodyScrollView>
-  );
+  const [totalBalance, setTotalBalance] = useState(2450.75);
+  const [monthlyIncome, setMonthlyIncome] = useState(3200.00);
+  const [monthlyExpenses, setMonthlyExpenses] = useState(1850.25);
 
   const renderHeaderRight = () => (
     <Pressable
-      onPress={() => {console.log("plus")}}
-      style={styles.headerButtonContainer}
+      onPress={() => router.push("/add-transaction")}
+      style={styles.headerButton}
     >
-      <IconSymbol name="plus" color={ICON_COLOR} />
+      <IconSymbol name="plus" color={colors.primary} size={24} />
     </Pressable>
   );
 
   const renderHeaderLeft = () => (
     <Pressable
-      onPress={() => {console.log("gear")}}
-      style={styles.headerButtonContainer}
+      onPress={() => router.push("/profile")}
+      style={styles.headerButton}
     >
-      <IconSymbol
-        name="gear"
-        color={ICON_COLOR}
-      />
+      <IconSymbol name="person.circle" color={colors.primary} size={24} />
     </Pressable>
   );
 
@@ -89,93 +35,131 @@ export default function HomeScreen() {
     <>
       <Stack.Screen
         options={{
-          title: "Building the app...",
+          title: "FinanceFlow",
+          headerStyle: {
+            backgroundColor: colors.background,
+          },
+          headerTitleStyle: {
+            color: colors.text,
+            fontWeight: '700',
+          },
           headerRight: renderHeaderRight,
           headerLeft: renderHeaderLeft,
         }}
       />
-      <View style={styles.container}>
-        <FlatList
-          data={modalDemos}
-          renderItem={renderModalDemo}
-          keyExtractor={(item) => item.route}
-          contentContainerStyle={styles.listContainer}
-          contentInsetAdjustmentBehavior="automatic"
-          showsVerticalScrollIndicator={false}
-        />
-      </View>
+      <ScrollView style={[commonStyles.container]} showsVerticalScrollIndicator={false}>
+        <View style={commonStyles.content}>
+          
+          {/* Welcome Section */}
+          <View style={styles.welcomeSection}>
+            <Text style={commonStyles.title}>Welcome back!</Text>
+            <Text style={commonStyles.subtitle}>Here&apos;s your financial overview</Text>
+          </View>
+
+          {/* Balance Overview */}
+          <View style={styles.balanceCard}>
+            <Text style={styles.balanceLabel}>Total Balance</Text>
+            <Text style={styles.balanceAmount}>${totalBalance.toFixed(2)}</Text>
+            <View style={styles.balanceRow}>
+              <View style={styles.balanceItem}>
+                <Text style={[styles.balanceSubAmount, { color: colors.income }]}>
+                  +${monthlyIncome.toFixed(2)}
+                </Text>
+                <Text style={styles.balanceSubLabel}>Income</Text>
+              </View>
+              <View style={styles.balanceItem}>
+                <Text style={[styles.balanceSubAmount, { color: colors.expense }]}>
+                  -${monthlyExpenses.toFixed(2)}
+                </Text>
+                <Text style={styles.balanceSubLabel}>Expenses</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Quick Actions */}
+          <QuickActions />
+
+          {/* Dashboard Cards */}
+          <View style={styles.cardsGrid}>
+            <DashboardCard
+              title="Budget Status"
+              value="78%"
+              subtitle="of monthly budget used"
+              icon="chart.pie"
+              color={colors.warning}
+              onPress={() => router.push("/budget")}
+            />
+            <DashboardCard
+              title="Savings Goal"
+              value="$1,200"
+              subtitle="Emergency fund progress"
+              icon="target"
+              color={colors.success}
+              onPress={() => router.push("/goals")}
+            />
+          </View>
+
+          {/* Financial Goals */}
+          <FinancialGoals />
+
+          {/* Recent Transactions */}
+          <RecentTransactions />
+
+        </View>
+      </ScrollView>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  headerSection: {
-    padding: 20,
+  welcomeSection: {
+    paddingTop: 20,
     paddingBottom: 16,
-    backgroundColor: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e5e5',
   },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+  balanceCard: {
+    backgroundColor: colors.primary,
+    borderRadius: 20,
+    padding: 24,
+    marginBottom: 24,
+    alignItems: 'center',
+  },
+  balanceLabel: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.8)',
     marginBottom: 8,
   },
-  headerSubtitle: {
-    fontSize: 16,
-    color: '#666',
-    lineHeight: 22,
+  balanceAmount: {
+    fontSize: 36,
+    fontWeight: '700',
+    color: 'white',
+    marginBottom: 20,
   },
-  listContainer: {
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-  },
-  demoCard: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+  balanceRow: {
     flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+  },
+  balanceItem: {
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
   },
-  demoIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  demoContent: {
-    flex: 1,
-  },
-  demoTitle: {
+  balanceSubAmount: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 4,
   },
-  demoDescription: {
+  balanceSubLabel: {
     fontSize: 14,
-    color: '#666',
-    lineHeight: 18,
+    color: 'rgba(255, 255, 255, 0.7)',
   },
-  emptyStateContainer: {
-    alignItems: "center",
-    gap: 8,
-    paddingTop: 100,
+  cardsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+    gap: 12,
   },
-  headerButtonContainer: {
-    padding: 6, // Just enough padding around the 24px icon
+  headerButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: colors.backgroundAlt,
   },
 });
