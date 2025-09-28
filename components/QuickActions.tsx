@@ -33,6 +33,15 @@ export function QuickActions() {
     },
   ];
 
+  const handleActionPress = (route: string) => {
+    console.log(`Navigating to: ${route}`);
+    try {
+      router.push(route as any);
+    } catch (error) {
+      console.error('Navigation error:', error);
+    }
+  };
+
   return (
     <View style={commonStyles.section}>
       <Text style={commonStyles.sectionTitle}>Quick Actions</Text>
@@ -41,10 +50,7 @@ export function QuickActions() {
           <Pressable
             key={index}
             style={styles.actionButton}
-            onPress={() => {
-              console.log(`Navigating to: ${action.route}`);
-              // router.push(action.route as any);
-            }}
+            onPress={() => handleActionPress(action.route)}
           >
             <View style={[styles.actionIcon, { backgroundColor: `${action.color}20` }]}>
               <IconSymbol name={action.icon as any} color={action.color} size={24} />
